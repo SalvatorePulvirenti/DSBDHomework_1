@@ -1,0 +1,28 @@
+# Usa un'immagine base ufficiale di Python
+FROM python:3.10-slim
+
+# Imposta la directory di lavoro all'interno del container
+WORKDIR /app
+
+# Copia i file necessari nell'immagine
+COPY server.py .
+COPY user_management_pb2_grpc.py .
+COPY user_management_pb2.py .
+COPY requirements.txt .
+
+# Installa le dipendenze necessarie
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Imposta le variabili di ambiente (opzionale)
+# Puoi aggiungere variabili come MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, ecc.
+#ENV MYSQL_HOST="localhost" \
+#    MYSQL_USER="root" \
+#    MYSQL_PASSWORD="password" \
+#    MYSQL_DATABASE="database_name"
+ENV GRPC_PORT=50051
+
+# Espone la porta per il server gRPC
+EXPOSE 50051
+
+# Comando per avviare l'applicazione
+CMD ["python", "server.py"]
