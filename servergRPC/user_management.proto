@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+service UserManagement {
+  // Gestione Utenti
+  rpc RegisterUser(RegisterUserRequest) returns (UserResponse);
+  rpc UpdateUser(UpdateUserRequest) returns (UserResponse);
+  rpc DeleteUser(DeleteUserRequest) returns (DeleteResponse);
+
+  // Recupero Dati
+  rpc GetLatestStockValue(GetLatestStockValueRequest) returns (StockValueResponse);
+  rpc GetAverageStockValue(GetAverageStockValueRequest) returns (AverageValueResponse);
+}
+
+message RegisterUserRequest {
+  string email = 1;
+  string ticker = 2;
+}
+
+message UpdateUserRequest {
+  string email = 1;
+  string new_ticker = 2;
+}
+
+message DeleteUserRequest {
+  string email = 1;
+}
+
+message GetLatestStockValueRequest {
+  string email = 1;
+}
+
+message GetAverageStockValueRequest {
+  string email = 1;
+  int32 count = 2;
+}
+
+message UserResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message DeleteResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message StockValueResponse {
+  string ticker = 1;
+  double value = 2;
+  string timestamp = 3;
+}
+
+message AverageValueResponse {
+  double average = 1;
+}
+
