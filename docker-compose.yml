@@ -1,22 +1,37 @@
-
 services:
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8080:8080"
   mysql:
     image: mysql:8.0
-    container_name: mysql_db
+    container_name: mysql_container
     environment:
-      MYSQL_ROOT_PASSWORD: '1234'
-      MYSQL_DATABASE: 'user_management'
-      MYSQL_USER: 'Admin'
-      MYSQL_PASSWORD: '1234'
-      TZ: Europe/Rome
-    command: --init-file /data/application/init.sql
-    volumes:
-        - mysql_data:/var/lib/mysql
-        - ./init.sql:/data/application/init.sql
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: usermanagement
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 20s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
     ports:
-        - 3307:3306
-    networks:
-        - services_network
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  bash_runner:
+    build:
+      context: .
+      dockerfile: bashDockerfile
+    depends_on:
+      mysql:
+         condition: service_healthy
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: usermanagement
+
   datacollector:
     image: datacollector_image
     build:
@@ -24,9 +39,8 @@ services:
       dockerfile: datacollectorDockerfile
     container_name: datacollector
     depends_on:
-        - mysql
-    networks:
-        - services_network
+      mysql:
+         condition: service_healthy
 
   servergrpc:
     image: servergrpc_image
@@ -35,15 +49,11 @@ services:
       dockerfile: servergRPCDockerfile
     container_name: servergRPC
     depends_on:
-       - datacollector
+      mysql:
+        condition: service_healthy
+    restart: always
     ports:
        - "50051:50051"
-    networks:
-        - services_network
-
-networks:
-  services_network:
-    driver: bridge
-
+ 
 volumes:
-  mysql_data: {}
+  mysql_data:

@@ -1,0 +1,14 @@
+# Usa un'immagine base con Bash e MySQL client
+FROM ubuntu:20.04
+
+# Installa il client MySQL
+RUN apt-get update && apt-get install -y mysql-client bash
+
+# Copia lo script nel container
+COPY init_db.sh /usr/local/bin/init_db.sh
+
+# Rendi eseguibile lo script
+RUN chmod +x /usr/local/bin/init_db.sh
+
+# Comando di default: esegue lo script
+CMD ["/usr/local/bin/init_db.sh"]
