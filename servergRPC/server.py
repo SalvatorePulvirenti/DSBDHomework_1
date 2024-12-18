@@ -8,10 +8,11 @@ from threading import Lock
 
 
 DB_CONFIG = {
-    'host': 'mysql',
+#    'host': 'localhost',
+    'host':'mysql',
     'user': 'Admin',
     'password': '1234',
-    'database': 'user_management'
+    'database': 'usermanagement'
 }
 
 request_cache={}
@@ -22,7 +23,7 @@ class UserService(UserManagementServicer):
     def __init__(self):
         self.conn = mysql.connector.connect(**DB_CONFIG)
         self.cursor = self.conn.cursor()
-        self.cursor.execute("SELECT email,ticker FROM users")
+        self.cursor.execute("SELECT email,ticker FROM utenti")
         users=self.cursor.fetchall()
         with cache_lock:
              for email,ticker in users:
@@ -60,7 +61,7 @@ class UserService(UserManagementServicer):
                if 'shortName' not in info:
 #                raise ValueError(f"Nessun dato valido trovato per il simbolo: {symbol}")
                    return UserResponse(success=False, message="ticker does'n exists.")
-               self.cursor.execute("INSERT INTO users (email, ticker) VALUES (%s, %s)", (email, ticker))
+               self.cursor.execute("INSERT INTO utenti (email, ticker) VALUES (%s, %s)", (email, ticker))
                self.conn.commit()
                return UserResponse(success=True, message="User registered successfully.")
            except mysql.connector.IntegrityError:
@@ -74,7 +75,7 @@ class UserService(UserManagementServicer):
 	        with cache_lock:
            	   request_cache[email]=ticker
                 
-        	self.cursor.execute("UPDATE users SET ticker = %s WHERE email = %s", (new_ticker, email))
+        	self.cursor.execute("UPDATE utenti SET ticker = %s WHERE email = %s", (new_ticker, email))
         	self.conn.commit()
         	return UserResponse(success=True, message="User updated successfully.")
         return UserResponse(success=False, message="User not {email} updated, not in queue.")
@@ -82,13 +83,13 @@ class UserService(UserManagementServicer):
 
     def DeleteUser(self, request, context):
         email = request.email
-        self.cursor.execute("DELETE FROM users WHERE email = %s", (email,))
+        self.cursor.execute("DELETE FROM utenti WHERE email = %s", (email,))
         self.conn.commit()
         return DeleteResponse(success=True, message="User deleted successfully.")
 
     def GetLatestStockValue(self, request, context):
         email = request.email
-        self.cursor.execute("SELECT ticker FROM users WHERE email = %s", (email,))
+        self.cursor.execute("SELECT ticker FROM utenti WHERE email = %s", (email,))
         result = self.cursor.fetchone()
         if result:
             ticker = result[0]
