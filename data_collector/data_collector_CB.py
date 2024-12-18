@@ -8,14 +8,14 @@ DB_CONFIG ={
 	'host': 'mysql',
 	'user':'Admin',
 	'password': '1234',
-	'database': 'user_management'
+	'database': 'usermanagement'
 }
 
 def fetch_stock_data():
     conn = mysql.connector.connect(**DB_CONFIG)
     cursor = conn.cursor()
 
-    cursor.execute("SELECT email, ticker FROM users")
+    cursor.execute("SELECT email, ticker FROM utenti")
     users = cursor.fetchall()
 
     for email, ticker in users:
